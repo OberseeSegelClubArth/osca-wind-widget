@@ -1,0 +1,4 @@
+name = "osca-meteoswiss-wind"
+main = "src/index.js"
+compatibility_date = "2026-07-24"
+workers_dev = true
