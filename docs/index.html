@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Windprognose Arth – OSCA</title>
+<style>
+:root{--ink:#10283e;--muted:#617286;--line:#dbe5ec;--soft:#f4f8fb;--accent:#00689d}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--ink);background:#fff}
+.card{border:1px solid var(--line);border-radius:14px;overflow:hidden;max-width:1050px;margin:auto;background:white}
+header{padding:18px 20px 13px;display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+h1{font-size:20px;margin:0 0 4px}.sub{font-size:13px;color:var(--muted)}
+.badge{font-size:12px;padding:5px 8px;border-radius:999px;background:var(--soft);white-space:nowrap}
+.controls{display:flex;gap:8px;padding:0 20px 14px;flex-wrap:wrap}
+button{border:1px solid var(--line);background:white;border-radius:8px;padding:7px 10px;cursor:pointer;color:var(--ink)}
+button.active{background:var(--ink);color:white;border-color:var(--ink)}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.metric{background:white;padding:13px 16px}.metric b{display:block;font-size:22px}.metric span{font-size:12px;color:var(--muted)}
+.chartwrap{padding:16px 14px 4px;overflow-x:auto}.chart{min-width:760px;height:320px;position:relative}
+svg{width:100%;height:100%;display:block}.grid{stroke:#e5edf2;stroke-width:1}.axis{fill:var(--muted);font-size:11px}
+.wind{fill:none;stroke:#0078a8;stroke-width:3}.gust{fill:none;stroke:#e36b2c;stroke-width:3}
+.dot-w{fill:#0078a8}.dot-g{fill:#e36b2c}.legend{display:flex;gap:17px;padding:0 20px 14px;font-size:12px;color:var(--muted)}
+.key:before{content:"";width:12px;height:3px;display:inline-block;margin-right:6px;vertical-align:middle;background:#0078a8}.key.g:before{background:#e36b2c}
+.tablewrap{overflow:auto;border-top:1px solid var(--line)}table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}
+th,td{padding:9px 12px;border-bottom:1px solid #edf2f5;text-align:right}th:first-child,td:first-child{text-align:left}
+footer{padding:11px 16px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+a{color:var(--accent)}.error{padding:30px;color:#9b2c2c}.arrow{display:inline-block;font-size:17px}
+@media(max-width:600px){.summary{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:1/-1}header{display:block}.badge{display:inline-block;margin-top:8px}}
+</style>
+</head>
+<body>
+<div class="card">
+  <header>
+    <div><h1>Windprognose Arth</h1><div class="sub">Wind, Böen und Richtung · PLZ 6415</div></div>
+    <div class="badge" id="status">Lade MeteoSwiss…</div>
+  </header>
+  <div class="controls">
+    <button data-hours="24" class="active">24 Std.</button>
+    <button data-hours="48">48 Std.</button>
+    <button data-hours="72">72 Std.</button>
+  </div>
+  <div id="content"></div>
+  <footer>
+    <span>Quelle: MeteoSchweiz · Aktualisierung stündlich</span>
+    <a target="_blank" rel="noopener" href="https://www.meteoschweiz.admin.ch/lokalprognose/arth/6415.html#forecast-tab=wind-gust-peaks">Detailprognose öffnen</a>
+  </footer>
+</div>
+<script>
+const API = "./forecast.json";
+let all=[], selected=24;
+
+document.querySelectorAll("button[data-hours]").forEach(b=>b.onclick=()=>{
+  selected=Number(b.dataset.hours);
+  document.querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));
+  render();
+});
+
+fetch(API).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})
+.then(data=>{
+  if(data.error)throw new Error(data.error);
+  all=data.forecast||[];
+  document.getElementById("status").textContent="Live · "+new Date(data.updated_at).toLocaleTimeString("de-CH",{hour:"2-digit",minute:"2-digit"});
+  render();
+}).catch(e=>{
+  document.getElementById("status").textContent="Daten nicht verfügbar";
+  document.getElementById("content").innerHTML='<div class="error">Die Live-Daten konnten nicht geladen werden.<br><small>'+esc(e.message)+'</small></div>';
+});
+
+function render(){
+ const rows=all.slice(0,selected);
+ if(!rows.length)return;
+ const maxG=Math.max(...rows.map(x=>x.gust_kmh||0));
+ const maxW=Math.max(...rows.map(x=>x.wind_kmh||0));
+ const strongest=rows.reduce((a,b)=>(b.gust_kmh||0)>(a.gust_kmh||0)?b:a,rows[0]);
+ document.getElementById("content").innerHTML=`
+ <div class="summary">
+  <div class="metric"><b>${fmt(maxW)} km/h</b><span>Max. mittlerer Wind</span></div>
+  <div class="metric"><b>${fmt(maxG)} km/h</b><span>Max. Böe</span></div>
+  <div class="metric"><b>${daytime(strongest.time)}</b><span>Zeitpunkt stärkste Böe</span></div>
+ </div>
+ <div class="chartwrap"><div class="chart">${chart(rows)}</div></div>
+ <div class="legend"><span class="key">Wind</span><span class="key g">Böen</span></div>
+ <div class="tablewrap"><table><thead><tr><th>Zeit</th><th>Richtung</th><th>Wind</th><th>Böen</th></tr></thead>
+ <tbody>${rows.map(r=>`<tr><td>${daytime(r.time)}</td><td><span class="arrow" style="transform:rotate(${r.direction_deg||0}deg)">↓</span> ${compass(r.direction_deg)}</td><td>${fmt(r.wind_kmh)} km/h</td><td><b>${fmt(r.gust_kmh)} km/h</b></td></tr>`).join("")}</tbody></table></div>`;
+}
+function chart(rows){
+ const W=1000,H=300,p={l:42,r:12,t:16,b:38};
+ const max=Math.max(10,...rows.map(x=>x.gust_kmh||0));
+ const x=i=>p.l+i*(W-p.l-p.r)/Math.max(1,rows.length-1);
+ const y=v=>p.t+(max-v)*(H-p.t-p.b)/max;
+ const path=k=>rows.map((r,i)=>(i?"L":"M")+x(i).toFixed(1)+","+y(r[k]||0).toFixed(1)).join(" ");
+ let grid="";
+ for(let v=0;v<=max;v+=Math.max(5,Math.ceil(max/5/5)*5)) grid+=`<line class="grid" x1="${p.l}" x2="${W-p.r}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="4" y="${y(v)+4}">${v}</text>`;
+ let labels="";
+ rows.forEach((r,i)=>{if(i%6===0)labels+=`<text class="axis" text-anchor="middle" x="${x(i)}" y="${H-12}">${new Date(r.time).toLocaleString("de-CH",{weekday:"short",hour:"2-digit"})}</text>`});
+ return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grid}<path class="wind" d="${path("wind_kmh")}"/><path class="gust" d="${path("gust_kmh")}"/>${labels}</svg>`;
+}
+function compass(d){if(d==null)return"–";return["N","NO","O","SO","S","SW","W","NW"][Math.round(d/45)%8]}
+function fmt(v){return v==null?"–":Math.round(v)}
+function daytime(t){return new Date(t).toLocaleString("de-CH",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+</script>
+</body>
+</html>
