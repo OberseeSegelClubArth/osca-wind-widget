@@ -160,8 +160,8 @@ function render(){
     return;
   }
 
-  const maxG=Math.max(...rows.map(row=>row.gust_kmh||0));
-  const maxW=Math.max(...rows.map(row=>row.wind_kmh||0));
+  const maxG=Math.max(...rows.map(row=>knots(row.gust_kmh)||0));
+  const maxW=Math.max(...rows.map(row=>knots(row.wind_kmh)||0));
   const strongest=rows.reduce(
     (a,b)=>(b.gust_kmh||0)>(a.gust_kmh||0)?b:a,
     rows[0]
@@ -169,8 +169,8 @@ function render(){
 
   document.getElementById("content").innerHTML=`
     <div class="summary">
-      <div class="metric"><b>${formatValue(maxW)} km/h</b><span>Max. mittlerer Wind</span></div>
-      <div class="metric"><b>${formatValue(maxG)} km/h</b><span>Max. Böe</span></div>
+      <div class="metric"><b>${formatValue(maxW)} kn</b><span>Max. mittlerer Wind</span></div>
+      <div class="metric"><b>${formatValue(maxG)} kn</b><span>Max. Böe</span></div>
       <div class="metric"><b>${dateTime(strongest.time)}</b><span>Zeitpunkt stärkste Böe</span></div>
     </div>
     <div class="chartwrap"><div class="chart">${chart(rows)}</div></div>
@@ -182,8 +182,8 @@ function render(){
           <tr>
             <td>${dateTime(row.time)}</td>
             <td><span class="arrow" style="transform:rotate(${row.direction_deg||0}deg)">↓</span> ${compass(row.direction_deg)}</td>
-            <td>${formatValue(row.wind_kmh)} km/h</td>
-            <td><b>${formatValue(row.gust_kmh)} km/h</b></td>
+            <td>${formatValue(knots(row.wind_kmh))} kn</td>
+            <td><b>${formatValue(knots(row.gust_kmh))} kn</b></td>
           </tr>
         `).join("")}</tbody>
       </table>
@@ -193,11 +193,11 @@ function render(){
 
 function chart(rows){
   const W=1000,H=300,p={l:42,r:12,t:16,b:38};
-  const max=Math.max(10,...rows.map(row=>row.gust_kmh||0));
+  const max=Math.max(5,...rows.map(row=>knots(row.gust_kmh)||0));
   const x=index=>p.l+index*(W-p.l-p.r)/Math.max(1,rows.length-1);
   const y=value=>p.t+(max-value)*(H-p.t-p.b)/max;
   const path=key=>rows.map((row,index)=>
-    (index?"L":"M")+x(index).toFixed(1)+","+y(row[key]||0).toFixed(1)
+    (index?"L":"M")+x(index).toFixed(1)+","+y(knots(row[key])||0).toFixed(1)
   ).join(" ");
 
   let grid="";
@@ -228,7 +228,8 @@ function compass(degrees){
   if(degrees==null)return"–";
   return["N","NO","O","SO","S","SW","W","NW"][Math.round(degrees/45)%8];
 }
-function formatValue(value){return value==null?"–":Math.round(value)}
+function knots(value){return value==null?null:value/1.852}
+function formatValue(value){return value==null?"–":Math.round(value*10)/10}
 function dateTime(time){
   return new Date(time).toLocaleString("de-CH",{
     weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"
