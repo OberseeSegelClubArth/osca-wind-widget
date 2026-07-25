@@ -105,7 +105,7 @@ async function fetchPoiSeries(href, param, pointId, pointTypeId) {
         x.time ||
         x.reference_timestamp ||
         x.reference_datetime ||
-        Object.values(x).find(v => /^\\d{12}$/.test(String(v).trim()));
+        Object.values(x).find(v => /^\d{12}$/.test(String(v).trim()));
 
       const rawValue =
         x[param] ??
