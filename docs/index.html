@@ -9,12 +9,12 @@
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:var(--ink);background:#fff}
 .card{border:1px solid var(--line);border-radius:14px;overflow:hidden;max-width:1100px;margin:auto;background:#fff}
-header{padding:18px 20px 12px;display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
-h1{font-size:21px;margin:0 0 4px}.sub{font-size:13px;color:var(--muted)}
+header{padding:18px 20px 12px;display:flex;gap:18px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:18px;min-width:0}.brand img{width:230px;max-width:35vw;height:auto;display:block}.brand-copy{min-width:0}h1{font-size:21px;margin:0 0 4px}.sub{font-size:13px;color:var(--muted)}
 .badge{font-size:12px;padding:5px 9px;border-radius:999px;background:var(--soft);white-space:nowrap}
 .location-tabs{display:flex;gap:5px;padding:0 20px 13px;overflow-x:auto;scrollbar-width:thin}
 .location-tabs button{white-space:nowrap;border-radius:999px;padding:8px 13px}
-.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 20px 14px;flex-wrap:wrap}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 20px 14px;flex-wrap:wrap}.details-button{background:var(--ink);color:#fff;border-color:var(--ink)}.details-button:hover{background:#173b5b;color:#fff}
 .hours{display:flex;gap:8px}.details-button{display:flex;align-items:center;gap:6px}
 button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;cursor:pointer;color:var(--ink);font:inherit}
 button:hover{background:var(--soft)}
@@ -33,7 +33,7 @@ footer{padding:11px 16px;font-size:11px;color:var(--muted);display:flex;justify-
 a{color:var(--accent)}.error{padding:30px;color:#9b2c2c}.arrow{display:inline-block;font-size:17px}
 @media(max-width:650px){
   .summary{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:1/-1}
-  header{display:block}.badge{display:inline-block;margin-top:8px}
+  header{display:block}.brand{display:block}.brand img{width:185px;max-width:70vw;margin-bottom:10px}.badge{display:inline-block;margin-top:8px}
   .location-tabs,.toolbar{padding-left:12px;padding-right:12px}
   footer{display:block}footer a{display:inline-block;margin-top:7px}
 }
@@ -42,9 +42,12 @@ a{color:var(--accent)}.error{padding:30px;color:#9b2c2c}.arrow{display:inline-bl
 <body>
 <div class="card">
   <header>
-    <div>
-      <h1 id="title">Windprognose Zugersee</h1>
-      <div class="sub" id="subtitle">Wind und Böen an wichtigen Segelstandorten</div>
+    <div class="brand">
+      <img src="osca-logo.jpg" alt="OSCA – Obersee Segelclub Arth">
+      <div class="brand-copy">
+        <h1 id="title">Windprognose Zugersee</h1>
+        <div class="sub" id="subtitle">Wind und Böen an wichtigen Segelstandorten</div>
+      </div>
     </div>
     <div class="badge" id="status">Lade MeteoSwiss…</div>
   </header>
