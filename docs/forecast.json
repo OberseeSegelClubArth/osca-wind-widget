@@ -1,0 +1,13 @@
+{
+  "source": "MeteoSwiss",
+  "source_url": "https://www.meteoschweiz.admin.ch/lokalprognose/arth/6415.html#forecast-tab=wind-gust-peaks",
+  "location": {
+    "name": "Arth",
+    "postcode": "6415",
+    "elevation_m": 422,
+    "latitude": null,
+    "longitude": null
+  },
+  "updated_at": "2026-07-25T17:03:18.277Z",
+  "forecast": []
+}
