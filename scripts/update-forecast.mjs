@@ -5,49 +5,125 @@ const STAC = `https://data.geo.admin.ch/api/stac/v1/collections/${COLLECTION}`;
 const POINTS = `https://data.geo.admin.ch/${COLLECTION}/ogd-local-forecasting_meta_point.csv`;
 const TZ = "Europe/Zurich";
 const PARAMS = ["dkl010h0", "fu3010h0", "fu3010h1"];
-const POSTCODE = "6415";
 
-const point = await getPoint(POSTCODE);
+const LOCATIONS = [
+  {
+    id: "arth",
+    label: "Arth",
+    postcode: "6415",
+    namePattern: /^Arth$/i,
+    source_url: "https://www.meteoschweiz.admin.ch/lokalprognose/arth/6415.html#forecast-tab=wind-gust-peaks"
+  },
+  {
+    id: "walchwil",
+    label: "Walchwil",
+    postcode: "6318",
+    namePattern: /^Walchwil$/i,
+    source_url: "https://www.meteoschweiz.admin.ch/lokalprognose/walchwil/6318.html#forecast-tab=wind-gust-peaks"
+  },
+  {
+    id: "cham",
+    label: "Cham",
+    postcode: "6330",
+    namePattern: /^Cham$/i,
+    source_url: "https://www.meteoschweiz.admin.ch/lokalprognose/cham/6330.html#forecast-tab=wind-gust-peaks"
+  },
+  {
+    id: "risch",
+    label: "Risch",
+    postcode: "6343",
+    namePattern: /^Risch$/i,
+    source_url: "https://www.meteoschweiz.admin.ch/lokalprognose/risch/6343.html#forecast-tab=wind-gust-peaks"
+  },
+  {
+    id: "zug-marina",
+    label: "Marina Zug",
+    postcode: "6300",
+    namePattern: /^Zug$/i,
+    source_url: "https://www.meteoschweiz.admin.ch/lokalprognose/zug/6300.html#forecast-tab=wind-gust-peaks"
+  }
+];
+
+console.log("Loading MeteoSwiss point metadata...");
+const pointResponse = await fetch(POINTS);
+if (!pointResponse.ok) throw new Error(`Point metadata unavailable (${pointResponse.status})`);
+const pointText = new TextDecoder("iso-8859-1").decode(await pointResponse.arrayBuffer());
+const pointRows = parseCsv(pointText);
+
+const selectedLocations = LOCATIONS.map(location => ({
+  ...location,
+  point: getPoint(pointRows, location)
+}));
+
 const item = await getLatestItem();
 const assetMap = pickLatestAssets(item.assets);
 
-const series = {};
+// Download each national parameter file only once, then extract all five points.
+const seriesByLocation = Object.fromEntries(
+  selectedLocations.map(location => [location.id, {}])
+);
+
 for (const param of PARAMS) {
   const href = assetMap[param];
   if (!href) throw new Error(`No latest asset found for ${param}`);
-  series[param] = await fetchPoiSeries(
-    href, param, String(point.point_id), String(point.point_type_id)
-  );
+
+  console.log(`Downloading ${param}...`);
+  const rows = await fetchCsv(href);
+
+  for (const location of selectedLocations) {
+    seriesByLocation[location.id][param] = extractPointSeries(
+      rows,
+      param,
+      String(location.point.point_id),
+      String(location.point.point_type_id)
+    );
+  }
 }
 
 const body = {
   source: "MeteoSwiss",
-  source_url: "https://www.meteoschweiz.admin.ch/lokalprognose/arth/6415.html#forecast-tab=wind-gust-peaks",
-  location: {
-    name: point.point_name || "Arth",
-    postcode: POSTCODE,
-    elevation_m: num(point.point_height_masl),
-    latitude: num(point.point_latitude),
-    longitude: num(point.point_longitude)
-  },
   updated_at: new Date().toISOString(),
-  forecast: mergeSeries(series).slice(0, 120)
+  locations: selectedLocations.map(location => ({
+    id: location.id,
+    label: location.label,
+    postcode: location.postcode,
+    source_url: location.source_url,
+    point_name: location.point.point_name,
+    elevation_m: num(location.point.point_height_masl),
+    latitude: num(location.point.point_latitude),
+    longitude: num(location.point.point_longitude),
+    forecast: mergeSeries(seriesByLocation[location.id]).slice(0, 120)
+  }))
 };
 
+for (const location of body.locations) {
+  if (!location.forecast.length) {
+    throw new Error(`No forecast rows generated for ${location.label}`);
+  }
+  console.log(`${location.label}: ${location.forecast.length} rows`);
+}
+
 await fs.mkdir("docs", { recursive: true });
-await fs.writeFile("docs/forecast.json", JSON.stringify(body, null, 2) + "\n", "utf8");
-console.log(`Wrote ${body.forecast.length} forecast rows to docs/forecast.json`);
+await fs.writeFile(
+  "docs/forecast.json",
+  JSON.stringify(body, null, 2) + "\n",
+  "utf8"
+);
+console.log(`Wrote ${body.locations.length} locations to docs/forecast.json`);
 
 async function getLatestItem() {
   for (let daysBack = 0; daysBack <= 2; daysBack++) {
     const d = new Date(Date.now() - daysBack * 86400000);
     const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit"
+      timeZone: TZ,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
     }).formatToParts(d);
     const v = Object.fromEntries(parts.map(p => [p.type, p.value]));
     const id = `${v.year}${v.month}${v.day}-ch`;
-    const r = await fetch(`${STAC}/items/${id}`);
-    if (r.ok) return r.json();
+    const response = await fetch(`${STAC}/items/${id}`);
+    if (response.ok) return response.json();
   }
   throw new Error("No recent MeteoSwiss STAC item available");
 }
@@ -55,65 +131,70 @@ async function getLatestItem() {
 function pickLatestAssets(assets) {
   const keys = Object.keys(assets);
   const runs = keys
-    .map(k => (k.match(/\.(\d{12})\./) || [])[1])
+    .map(key => (key.match(/\.(\d{12})\./) || [])[1])
     .filter(Boolean)
     .sort();
+
   if (!runs.length) throw new Error("Could not identify MeteoSwiss forecast run");
   const latest = runs[runs.length - 1];
 
-  const out = {};
-  for (const param of PARAMS) {
-    const key = keys.find(k => k.includes(param) && k.includes(`.${latest}.`));
-    if (key) out[param] = assets[key].href;
-  }
-  return out;
+  return Object.fromEntries(
+    PARAMS.map(param => {
+      const key = keys.find(k => k.includes(param) && k.includes(`.${latest}.`));
+      return [param, key ? assets[key].href : null];
+    })
+  );
 }
 
-async function getPoint(postcode) {
-  const r = await fetch(POINTS);
-  if (!r.ok) throw new Error(`Point metadata unavailable (${r.status})`);
-  const text = new TextDecoder("iso-8859-1").decode(await r.arrayBuffer());
-  const rows = parseCsv(text);
-  const exact = rows.find(x =>
-    String(x.postal_code || "").trim() === String(postcode) &&
-    String(x.point_type_id || "").trim() === "2" &&
-    /arth/i.test(String(x.point_name || ""))
+function getPoint(rows, location) {
+  const candidates = rows.filter(row =>
+    String(row.postal_code || "").trim() === location.postcode &&
+    String(row.point_type_id || "").trim() === "2"
   );
-  const fallback = rows.find(x =>
-    String(x.postal_code || "").trim() === String(postcode) &&
-    String(x.point_type_id || "").trim() === "2"
+
+  const exact = candidates.find(row =>
+    location.namePattern.test(String(row.point_name || "").trim())
   );
-  const point = exact || fallback;
-  if (!point) throw new Error(`No MeteoSwiss forecast point found for postcode ${postcode}`);
+
+  const point = exact || candidates[0];
+  if (!point) {
+    throw new Error(`No MeteoSwiss point found for ${location.label} (${location.postcode})`);
+  }
+
+  console.log(`${location.label} uses MeteoSwiss point "${point.point_name}"`);
   return point;
 }
 
-async function fetchPoiSeries(href, param, pointId, pointTypeId) {
-  const r = await fetch(href);
-  if (!r.ok) throw new Error(`${param} unavailable (${r.status})`);
-  const text = new TextDecoder("iso-8859-1").decode(await r.arrayBuffer());
-  const rows = parseCsv(text);
+async function fetchCsv(href) {
+  const response = await fetch(href);
+  if (!response.ok) throw new Error(`Forecast file unavailable (${response.status})`);
+  const text = new TextDecoder("iso-8859-1").decode(await response.arrayBuffer());
+  return parseCsv(text);
+}
 
+function extractPointSeries(rows, param, pointId, pointTypeId) {
   return rows
-    .filter(x =>
-      String(x.point_id).trim() === pointId &&
-      String(x.point_type_id).trim() === pointTypeId
+    .filter(row =>
+      String(row.point_id || "").trim() === pointId &&
+      String(row.point_type_id || "").trim() === pointTypeId
     )
-    .map(x => {
+    .map(row => {
       const timestamp =
-        x.date ||
-        x.time ||
-        x.reference_timestamp ||
-        x.reference_datetime ||
-        Object.values(x).find(v => /^\d{12}$/.test(String(v).trim()));
+        row.date ||
+        row.time ||
+        row.reference_timestamp ||
+        row.reference_datetime ||
+        Object.values(row).find(value => /^\d{12}$/.test(String(value).trim()));
 
       const rawValue =
-        x[param] ??
-        x.value ??
-        Object.entries(x)
+        row[param] ??
+        row.value ??
+        Object.entries(row)
           .filter(([key, value]) =>
-            !["point_id", "point_type_id", "date", "time",
-              "reference_timestamp", "reference_datetime"].includes(key) &&
+            ![
+              "point_id", "point_type_id", "date", "time",
+              "reference_timestamp", "reference_datetime"
+            ].includes(key) &&
             value !== "" &&
             Number.isFinite(Number(String(value).replace(",", ".")))
           )
@@ -125,71 +206,79 @@ async function fetchPoiSeries(href, param, pointId, pointTypeId) {
         value: num(rawValue)
       };
     })
-    .filter(x => x.time && x.value !== null);
+    .filter(row => row.time && row.value !== null);
 }
 
 function mergeSeries(series) {
   const map = new Map();
+
   for (const [param, rows] of Object.entries(series)) {
     for (const row of rows) {
       if (!map.has(row.time)) map.set(row.time, { time: row.time });
       map.get(row.time)[param] = row.value;
     }
   }
+
   return [...map.values()]
     .sort((a, b) => a.time.localeCompare(b.time))
-    .filter(x => new Date(x.time).getTime() >= Date.now() - 3600000)
-    .map(x => ({
-      time: x.time,
-      direction_deg: x.dkl010h0 ?? null,
-      wind_kmh: x.fu3010h0 ?? null,
-      gust_kmh: x.fu3010h1 ?? null
+    .filter(row => new Date(row.time).getTime() >= Date.now() - 3600000)
+    .map(row => ({
+      time: row.time,
+      direction_deg: row.dkl010h0 ?? null,
+      wind_kmh: row.fu3010h0 ?? null,
+      gust_kmh: row.fu3010h1 ?? null
     }));
 }
 
 function parseCsv(text) {
   const lines = text.replace(/\r/g, "").split("\n").filter(Boolean);
   if (!lines.length) return [];
+
   const headers = splitLine(lines[0]);
   return lines.slice(1).map(line => {
-    const vals = splitLine(line);
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = vals[i] ?? "");
-    return obj;
+    const values = splitLine(line);
+    const row = {};
+    headers.forEach((header, index) => {
+      row[header] = values[index] ?? "";
+    });
+    return row;
   });
 }
 
 function splitLine(line) {
-  const out = [];
-  let cur = "";
+  const values = [];
+  let current = "";
   let quoted = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') {
-      if (quoted && line[i + 1] === '"') {
-        cur += '"';
-        i++;
+
+  for (let index = 0; index < line.length; index++) {
+    const char = line[index];
+
+    if (char === '"') {
+      if (quoted && line[index + 1] === '"') {
+        current += '"';
+        index++;
       } else {
         quoted = !quoted;
       }
-    } else if (c === ";" && !quoted) {
-      out.push(cur);
-      cur = "";
+    } else if (char === ";" && !quoted) {
+      values.push(current);
+      current = "";
     } else {
-      cur += c;
+      current += char;
     }
   }
-  out.push(cur);
-  return out;
+
+  values.push(current);
+  return values;
 }
 
-function utcStampToIso(s) {
-  if (!/^\d{12}$/.test(s)) return null;
-  return `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}T${s.slice(8,10)}:${s.slice(10,12)}:00Z`;
+function utcStampToIso(value) {
+  if (!/^\d{12}$/.test(value)) return null;
+  return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}T${value.slice(8, 10)}:${value.slice(10, 12)}:00Z`;
 }
 
-function num(v) {
-  if (v === undefined || v === null || v === "") return null;
-  const n = Number(String(v).replace(",", "."));
-  return Number.isFinite(n) ? n : null;
+function num(value) {
+  if (value === undefined || value === null || value === "") return null;
+  const result = Number(String(value).replace(",", "."));
+  return Number.isFinite(result) ? result : null;
 }
