@@ -99,10 +99,32 @@ async function fetchPoiSeries(href, param, pointId, pointTypeId) {
       String(x.point_id).trim() === pointId &&
       String(x.point_type_id).trim() === pointTypeId
     )
-    .map(x => ({
-      time: utcStampToIso(String(x.date || x.time || "")),
-      value: num(x[param])
-    }))
+    .map(x => {
+      const timestamp =
+        x.date ||
+        x.time ||
+        x.reference_timestamp ||
+        x.reference_datetime ||
+        Object.values(x).find(v => /^\\d{12}$/.test(String(v).trim()));
+
+      const rawValue =
+        x[param] ??
+        x.value ??
+        Object.entries(x)
+          .filter(([key, value]) =>
+            !["point_id", "point_type_id", "date", "time",
+              "reference_timestamp", "reference_datetime"].includes(key) &&
+            value !== "" &&
+            Number.isFinite(Number(String(value).replace(",", ".")))
+          )
+          .map(([, value]) => value)
+          .at(-1);
+
+      return {
+        time: utcStampToIso(String(timestamp || "").trim()),
+        value: num(rawValue)
+      };
+    })
     .filter(x => x.time && x.value !== null);
 }
 
