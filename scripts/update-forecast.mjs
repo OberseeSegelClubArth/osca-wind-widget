@@ -130,18 +130,23 @@ async function getLatestItem() {
 
 function pickLatestAssets(assets) {
   const keys = Object.keys(assets);
-  const runs = keys
-    .map(key => (key.match(/\.(\d{12})\./) || [])[1])
-    .filter(Boolean)
-    .sort();
 
-  if (!runs.length) throw new Error("Could not identify MeteoSwiss forecast run");
-  const latest = runs[runs.length - 1];
-
+  // MeteoSwiss does not always publish every parameter at exactly the same
+  // timestamp. Pick the newest available file independently for each
+  // parameter instead of forcing one global run timestamp.
   return Object.fromEntries(
     PARAMS.map(param => {
-      const key = keys.find(k => k.includes(param) && k.includes(`.${latest}.`));
-      return [param, key ? assets[key].href : null];
+      const candidates = keys
+        .filter(key => key.includes(param))
+        .map(key => ({
+          key,
+          run: (key.match(/\.(\d{12})\./) || [])[1] || ""
+        }))
+        .filter(item => item.run)
+        .sort((a, b) => b.run.localeCompare(a.run));
+
+      const latest = candidates[0];
+      return [param, latest ? assets[latest.key].href : null];
     })
   );
 }
