@@ -110,10 +110,19 @@ fetch(API+"?v="+Date.now())
     locations=data.locations||[];
     if(!locations.length)throw new Error("Keine Standortdaten vorhanden");
     if(!locations.some(location=>location.id===activeId))activeId=locations[0].id;
-    document.getElementById("status").textContent=
-      "Live · "+new Date(data.updated_at).toLocaleTimeString("de-CH",{
-        hour:"2-digit",minute:"2-digit"
-      });
+    const updated=new Date(data.updated_at);
+    const ageHours=(Date.now()-updated.getTime())/3600000;
+    const status=document.getElementById("status");
+    const stamp=updated.toLocaleTimeString("de-CH",{hour:"2-digit",minute:"2-digit"});
+    if(ageHours>3){
+      status.textContent="⚠ Stand "+updated.toLocaleDateString("de-CH",{
+        weekday:"short",day:"2-digit",month:"2-digit"
+      })+", "+stamp+" Uhr – Daten veraltet";
+      status.style.background="#fdebc8";
+      status.style.color="#8a5a00";
+    }else{
+      status.textContent="Live · "+stamp;
+    }
     renderTabs();
     render();
   })

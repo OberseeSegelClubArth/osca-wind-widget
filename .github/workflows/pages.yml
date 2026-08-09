@@ -18,7 +18,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   update-and-deploy:
@@ -26,6 +26,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -44,7 +45,28 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/forecast.json
-          git diff --cached --quiet || git commit -m "Update MeteoSwiss forecast"
+          if git diff --cached --quiet; then
+            echo "Forecast unchanged - nothing to commit"
+            exit 0
+          fi
+          git commit -m "Update MeteoSwiss forecast"
+          # Push with retry: if another run (or a re-run) pushed first, re-base
+          # our freshly generated forecast onto the new tip instead of failing.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) - reapplying onto current main"
+            git fetch origin main
+            git reset --soft origin/main
+            git add docs/forecast.json
+            if git diff --cached --quiet; then
+              echo "Remote already has this forecast - nothing to push"
+              exit 0
+            fi
+            git commit -m "Update MeteoSwiss forecast"
+            sleep 5
+          done
           git push
 
       - name: Configure Pages
