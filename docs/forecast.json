@@ -1,6 +1,6 @@
 {
   "source": "MeteoSwiss",
-  "updated_at": "2026-08-15T07:44:32.369Z",
+  "updated_at": "2026-08-15T08:45:06.072Z",
   "locations": [
     {
       "id": "arth",
@@ -13,46 +13,40 @@
       "longitude": null,
       "forecast": [
         {
-          "time": "2026-08-15T07:00:00Z",
-          "direction_deg": 321,
-          "wind_kmh": 4.2,
-          "gust_kmh": 8.8
-        },
-        {
           "time": "2026-08-15T08:00:00Z",
-          "direction_deg": 29,
-          "wind_kmh": 3.9,
-          "gust_kmh": 9.3
+          "direction_deg": 186,
+          "wind_kmh": 4.6,
+          "gust_kmh": 10.8
         },
         {
           "time": "2026-08-15T09:00:00Z",
-          "direction_deg": 29,
-          "wind_kmh": 3.5,
-          "gust_kmh": 9.8
+          "direction_deg": 167,
+          "wind_kmh": 4.2,
+          "gust_kmh": 10
         },
         {
           "time": "2026-08-15T10:00:00Z",
-          "direction_deg": 29,
-          "wind_kmh": 3.2,
-          "gust_kmh": 10.2
+          "direction_deg": 121,
+          "wind_kmh": 3.8,
+          "gust_kmh": 10.6
         },
         {
           "time": "2026-08-15T11:00:00Z",
-          "direction_deg": 20,
-          "wind_kmh": 3,
-          "gust_kmh": 10.3
+          "direction_deg": 3,
+          "wind_kmh": 4.6,
+          "gust_kmh": 12.8
         },
         {
           "time": "2026-08-15T12:00:00Z",
-          "direction_deg": 2,
-          "wind_kmh": 2.7,
-          "gust_kmh": 10.4
+          "direction_deg": 127,
+          "wind_kmh": 7.9,
+          "gust_kmh": 17.9
         },
         {
           "time": "2026-08-15T13:00:00Z",
-          "direction_deg": 216,
-          "wind_kmh": 6.6,
-          "gust_kmh": 17.5
+          "direction_deg": 152,
+          "wind_kmh": 11.1,
+          "gust_kmh": 23
         },
         {
           "time": "2026-08-15T14:00:00Z",
@@ -731,6 +725,12 @@
           "direction_deg": 282,
           "wind_kmh": 3.3,
           "gust_kmh": 13.2
+        },
+        {
+          "time": "2026-08-20T07:00:00Z",
+          "direction_deg": 267,
+          "wind_kmh": 3.9,
+          "gust_kmh": 12.7
         }
       ]
     },
@@ -745,46 +745,40 @@
       "longitude": null,
       "forecast": [
         {
-          "time": "2026-08-15T07:00:00Z",
-          "direction_deg": 234,
-          "wind_kmh": 5.1,
-          "gust_kmh": 10
-        },
-        {
           "time": "2026-08-15T08:00:00Z",
-          "direction_deg": 187,
-          "wind_kmh": 5.4,
-          "gust_kmh": 11
+          "direction_deg": 201,
+          "wind_kmh": 4.9,
+          "gust_kmh": 11.4
         },
         {
           "time": "2026-08-15T09:00:00Z",
-          "direction_deg": 161,
-          "wind_kmh": 4.3,
-          "gust_kmh": 9.9
+          "direction_deg": 143,
+          "wind_kmh": 3.9,
+          "gust_kmh": 9.5
         },
         {
           "time": "2026-08-15T10:00:00Z",
-          "direction_deg": 118,
-          "wind_kmh": 3.9,
-          "gust_kmh": 9.7
+          "direction_deg": 84,
+          "wind_kmh": 3.7,
+          "gust_kmh": 8.9
         },
         {
           "time": "2026-08-15T11:00:00Z",
-          "direction_deg": 145,
-          "wind_kmh": 4.8,
-          "gust_kmh": 11.3
+          "direction_deg": 349,
+          "wind_kmh": 5.1,
+          "gust_kmh": 10.6
         },
         {
           "time": "2026-08-15T12:00:00Z",
-          "direction_deg": 166,
-          "wind_kmh": 5.7,
-          "gust_kmh": 12.8
+          "direction_deg": 154,
+          "wind_kmh": 10,
+          "gust_kmh": 17.1
         },
         {
           "time": "2026-08-15T13:00:00Z",
-          "direction_deg": 234,
-          "wind_kmh": 6.8,
-          "gust_kmh": 20.5
+          "direction_deg": 159,
+          "wind_kmh": 15,
+          "gust_kmh": 23.7
         },
         {
           "time": "2026-08-15T14:00:00Z",
@@ -1463,6 +1457,12 @@
           "direction_deg": 63,
           "wind_kmh": 2.5,
           "gust_kmh": 9.6
+        },
+        {
+          "time": "2026-08-20T07:00:00Z",
+          "direction_deg": 154,
+          "wind_kmh": 2.6,
+          "gust_kmh": 10.2
         }
       ]
     },
@@ -1477,46 +1477,40 @@
       "longitude": null,
       "forecast": [
         {
-          "time": "2026-08-15T07:00:00Z",
-          "direction_deg": 148,
-          "wind_kmh": 3.3,
-          "gust_kmh": 9.1
-        },
-        {
           "time": "2026-08-15T08:00:00Z",
-          "direction_deg": 121,
-          "wind_kmh": 3.6,
-          "gust_kmh": 9.5
+          "direction_deg": 141,
+          "wind_kmh": 6.2,
+          "gust_kmh": 12.6
         },
         {
           "time": "2026-08-15T09:00:00Z",
-          "direction_deg": 139,
-          "wind_kmh": 3.9,
-          "gust_kmh": 10.3
+          "direction_deg": 137,
+          "wind_kmh": 5.7,
+          "gust_kmh": 12.8
         },
         {
           "time": "2026-08-15T10:00:00Z",
-          "direction_deg": 155,
-          "wind_kmh": 4.6,
-          "gust_kmh": 12
+          "direction_deg": 140,
+          "wind_kmh": 5.8,
+          "gust_kmh": 13.1
         },
         {
           "time": "2026-08-15T11:00:00Z",
-          "direction_deg": 142,
-          "wind_kmh": 6.5,
-          "gust_kmh": 15.4
+          "direction_deg": 143,
+          "wind_kmh": 6.2,
+          "gust_kmh": 14.2
         },
         {
           "time": "2026-08-15T12:00:00Z",
-          "direction_deg": 135,
-          "wind_kmh": 8.4,
-          "gust_kmh": 18.8
+          "direction_deg": 147,
+          "wind_kmh": 7.4,
+          "gust_kmh": 17
         },
         {
           "time": "2026-08-15T13:00:00Z",
-          "direction_deg": 189,
-          "wind_kmh": 8.4,
-          "gust_kmh": 21.5
+          "direction_deg": 150,
+          "wind_kmh": 8.7,
+          "gust_kmh": 19.8
         },
         {
           "time": "2026-08-15T14:00:00Z",
@@ -2195,6 +2189,12 @@
           "direction_deg": 223,
           "wind_kmh": 3.5,
           "gust_kmh": 10.7
+        },
+        {
+          "time": "2026-08-20T07:00:00Z",
+          "direction_deg": 259,
+          "wind_kmh": 3.9,
+          "gust_kmh": 13.4
         }
       ]
     },
@@ -2209,46 +2209,40 @@
       "longitude": null,
       "forecast": [
         {
-          "time": "2026-08-15T07:00:00Z",
-          "direction_deg": 30,
-          "wind_kmh": 2.8,
-          "gust_kmh": 7.8
-        },
-        {
           "time": "2026-08-15T08:00:00Z",
-          "direction_deg": 108,
-          "wind_kmh": 2.9,
-          "gust_kmh": 8.3
-        },
-        {
-          "time": "2026-08-15T09:00:00Z",
-          "direction_deg": 113,
-          "wind_kmh": 3.4,
-          "gust_kmh": 9.2
-        },
-        {
-          "time": "2026-08-15T10:00:00Z",
-          "direction_deg": 117,
-          "wind_kmh": 4.5,
+          "direction_deg": 151,
+          "wind_kmh": 4.2,
           "gust_kmh": 10.9
         },
         {
+          "time": "2026-08-15T09:00:00Z",
+          "direction_deg": 98,
+          "wind_kmh": 3.7,
+          "gust_kmh": 10.6
+        },
+        {
+          "time": "2026-08-15T10:00:00Z",
+          "direction_deg": 102,
+          "wind_kmh": 4.6,
+          "gust_kmh": 12.1
+        },
+        {
           "time": "2026-08-15T11:00:00Z",
-          "direction_deg": 104,
-          "wind_kmh": 6.9,
-          "gust_kmh": 14
+          "direction_deg": 105,
+          "wind_kmh": 5.6,
+          "gust_kmh": 13.5
         },
         {
           "time": "2026-08-15T12:00:00Z",
-          "direction_deg": 98,
-          "wind_kmh": 9.3,
-          "gust_kmh": 17.1
+          "direction_deg": 113,
+          "wind_kmh": 6.7,
+          "gust_kmh": 14.9
         },
         {
           "time": "2026-08-15T13:00:00Z",
-          "direction_deg": 154,
-          "wind_kmh": 6.7,
-          "gust_kmh": 16.9
+          "direction_deg": 120,
+          "wind_kmh": 7.7,
+          "gust_kmh": 16.3
         },
         {
           "time": "2026-08-15T14:00:00Z",
@@ -2927,6 +2921,12 @@
           "direction_deg": 359,
           "wind_kmh": 2.8,
           "gust_kmh": 10.9
+        },
+        {
+          "time": "2026-08-20T07:00:00Z",
+          "direction_deg": 292,
+          "wind_kmh": 3.1,
+          "gust_kmh": 12.5
         }
       ]
     },
@@ -2941,46 +2941,40 @@
       "longitude": null,
       "forecast": [
         {
-          "time": "2026-08-15T07:00:00Z",
-          "direction_deg": 66,
-          "wind_kmh": 2.8,
-          "gust_kmh": 7.9
-        },
-        {
           "time": "2026-08-15T08:00:00Z",
-          "direction_deg": 139,
-          "wind_kmh": 3.4,
-          "gust_kmh": 8.5
+          "direction_deg": 127,
+          "wind_kmh": 3.6,
+          "gust_kmh": 9.8
         },
         {
           "time": "2026-08-15T09:00:00Z",
-          "direction_deg": 160,
-          "wind_kmh": 3.6,
-          "gust_kmh": 8.8
+          "direction_deg": 143,
+          "wind_kmh": 4.3,
+          "gust_kmh": 10.3
         },
         {
           "time": "2026-08-15T10:00:00Z",
-          "direction_deg": 179,
-          "wind_kmh": 3.9,
-          "gust_kmh": 9.6
+          "direction_deg": 180,
+          "wind_kmh": 5.3,
+          "gust_kmh": 11.6
         },
         {
           "time": "2026-08-15T11:00:00Z",
-          "direction_deg": 179,
-          "wind_kmh": 4.7,
-          "gust_kmh": 11.2
+          "direction_deg": 204,
+          "wind_kmh": 6,
+          "gust_kmh": 12.9
         },
         {
           "time": "2026-08-15T12:00:00Z",
-          "direction_deg": 178,
-          "wind_kmh": 5.4,
-          "gust_kmh": 12.8
+          "direction_deg": 207,
+          "wind_kmh": 6.1,
+          "gust_kmh": 13.9
         },
         {
           "time": "2026-08-15T13:00:00Z",
-          "direction_deg": 225,
-          "wind_kmh": 6.4,
-          "gust_kmh": 19.6
+          "direction_deg": 210,
+          "wind_kmh": 6.3,
+          "gust_kmh": 14.9
         },
         {
           "time": "2026-08-15T14:00:00Z",
@@ -3659,6 +3653,12 @@
           "direction_deg": 229,
           "wind_kmh": 3.7,
           "gust_kmh": 10.6
+        },
+        {
+          "time": "2026-08-20T07:00:00Z",
+          "direction_deg": 241,
+          "wind_kmh": 3.8,
+          "gust_kmh": 13.1
         }
       ]
     }
